@@ -1,9 +1,9 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title> Performance Studio — Vadodara</title>
+<title>Veyronix Fitness Performance Studio — Vadodara</title>
 <meta name="description" content="Veyronix Fitness Performance Studio — strength, conditioning, and boxing classes in Vadodara. Demo fitness website.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -77,11 +77,20 @@
   .nav-links a:hover::after{width:100%;}
   .nav-cta{font-family:var(--mono); font-size:12px; letter-spacing:1px; text-transform:uppercase; background:var(--coral); color:#100714; padding:11px 22px; border-radius:var(--radius); font-weight:700; transition:background .2s, transform .2s; border:none;}
   .nav-cta:hover{background:var(--coral-soft); transform:translateY(-1px);}
-  .hamburger{display:none; flex-direction:column; gap:5px; background:none; border:none; padding:8px;}
-  .hamburger span{width:24px; height:2px; background:var(--text); display:block;}
-  .mobile-menu{display:none; position:fixed; inset:64px 0 0 0; background:var(--bg); z-index:99; padding:40px 32px; flex-direction:column; gap:26px;}
+  .hamburger{display:none; flex-direction:column; justify-content:center; gap:5px; background:none; border:none; padding:8px; width:40px; height:40px; position:relative; z-index:201;}
+  .hamburger span{width:24px; height:2px; background:var(--text); display:block; transition:transform .25s ease, opacity .25s ease;}
+  .hamburger[aria-expanded="true"] span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+  .hamburger[aria-expanded="true"] span:nth-child(2){opacity:0;}
+  .hamburger[aria-expanded="true"] span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+  .mobile-menu{
+    display:none; position:fixed; top:var(--header-h, 64px); left:0; right:0; bottom:0;
+    height:calc(100dvh - var(--header-h, 64px));
+    background:var(--bg); z-index:200; padding:40px 32px 60px; flex-direction:column; gap:26px;
+    overflow-y:auto; -webkit-overflow-scrolling:touch;
+  }
   .mobile-menu.open{display:flex;}
   .mobile-menu a{font-family:var(--display); font-size:28px; text-transform:uppercase; color:var(--text);}
+  body.menu-open{overflow:hidden;}
 
   /* ---------- Hero (no external image — animated gradient + pulse motif) ---------- */
   .hero{
@@ -611,7 +620,7 @@
       <div class="reveal">
         <div class="contact-info-block">
           <div class="lbl">Address</div>
-          <div class="val"> Vadodara, Gujarat 390001, India</div>
+          <div class="val">77 Momentum Lane, Vadodara, Gujarat 390001, India</div>
         </div>
         <div class="contact-info-block">
           <div class="lbl">Phone</div>
@@ -725,14 +734,37 @@
 <script>
   const hamburgerBtn = document.getElementById('hamburgerBtn');
   const mobileMenu = document.getElementById('mobileMenu');
-  hamburgerBtn.addEventListener('click', () => {
-    const isOpen = mobileMenu.classList.toggle('open');
-    hamburgerBtn.setAttribute('aria-expanded', isOpen);
-  });
-  mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+  const siteHeader = document.querySelector('header');
+
+  function syncHeaderHeight(){
+    document.documentElement.style.setProperty('--header-h', siteHeader.offsetHeight + 'px');
+  }
+  syncHeaderHeight();
+  window.addEventListener('resize', syncHeaderHeight);
+  window.addEventListener('orientationchange', syncHeaderHeight);
+
+  function closeMenu(){
     mobileMenu.classList.remove('open');
     hamburgerBtn.setAttribute('aria-expanded', 'false');
-  }));
+    document.body.classList.remove('menu-open');
+  }
+  function openMenu(){
+    syncHeaderHeight();
+    mobileMenu.classList.add('open');
+    hamburgerBtn.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('menu-open');
+  }
+  hamburgerBtn.addEventListener('click', () => {
+    const isOpen = mobileMenu.classList.contains('open');
+    isOpen ? closeMenu() : openMenu();
+  });
+  mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape') closeMenu();
+  });
+  window.addEventListener('resize', () => {
+    if(window.innerWidth > 768) closeMenu();
+  });
 
   const revealEls = document.querySelectorAll('.reveal');
   const revealObserver = new IntersectionObserver((entries) => {
